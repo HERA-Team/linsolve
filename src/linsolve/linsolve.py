@@ -856,7 +856,7 @@ def taylor_expand(terms, consts=None, prepend="d"):
 # XXX make a version of linproductsolver that taylor expands in e^{a+bi} form
 # see https://github.com/HERA-Team/linsolve/issues/15
 class LinProductSolver:
-    def __init__(self, data, sol0, wgts={}, sparse=False, **kwargs):
+    def __init__(self, data, sol0, wgts={}, sparse=False, build_solver=True, **kwargs):
         """Set up a nonlinear system of equations of the form a*b + c*d = 1.0.
 
         Linearize via Taylor expansion and solve iteratively using the Gauss-Newton
@@ -882,6 +882,9 @@ class LinProductSolver:
         sparse : bool
             If True, represents A matrix sparsely (though AtA, Aty end up dense)
             May be faster for certain systems of equations.
+        build_solver : bool
+            Advanced users can turn this off to save memory when using only LinProductSolver
+            infrastructure but not solve() or solve_iteratively(), as in omnical.
         **kwargs: keyword arguments of constants (python variables in keys of data that
             are not to be solved for)
         """
@@ -894,8 +897,14 @@ class LinProductSolver:
         self.init_kwargs, self.sols_kwargs = constants, deepcopy(constants)
         self.sols_kwargs.update(sol0)
         self.all_terms, self.taylors, self.taylor_keys = self.gen_taylors()
-        self.build_solver(sol0)
-        self.dtype = self.ls.dtype
+        if build_solver:
+            self.build_solver(sol0)
+            self.dtype = self.ls.dtype
+        else:
+            self.sol0 = sol0
+            self.dtype = infer_dtype(list(self.data.values())
+                                     + list(self.sol0.values())
+                                     + list(self.wgts.values()))
 
     def gen_taylors(self, keys=None):
         """Perform Taylor expansion, and map eq. keys to taylor expansion keys."""
