@@ -36,12 +36,6 @@ import scipy.linalg
 import scipy.sparse.linalg
 from scipy.sparse import csc_matrix
 
-# Monkey patch for backward compatibility:
-# ast.Num deprecated in Python 3.8. Make it an alias for ast.Constant
-# if it gets removed.
-if not hasattr(ast, "Num"):
-    ast.Num = ast.Constant
-
 
 def ast_getterms(n):
     """Convert an AST parse tree into a list of terms.
@@ -50,7 +44,7 @@ def ast_getterms(n):
     """
     if type(n) is ast.Name:
         return [[n.id]]
-    elif type(n) is ast.Constant or type(n) is ast.Num:
+    elif type(n) is ast.Constant or type(n) is ast.Constant:
         return [[n.n]]
     elif type(n) is ast.Expression:
         return ast_getterms(n.body)
@@ -883,8 +877,9 @@ class LinProductSolver:
             If True, represents A matrix sparsely (though AtA, Aty end up dense)
             May be faster for certain systems of equations.
         build_solver : bool
-            Advanced users can turn this off to save memory when using only LinProductSolver
-            infrastructure but not solve() or solve_iteratively(), as in omnical.
+            Advanced users can turn this off to save memory when using only
+            LinProductSolver infrastructure but not solve() or solve_iteratively(), as
+            in omnical.
         **kwargs: keyword arguments of constants (python variables in keys of data that
             are not to be solved for)
         """
@@ -902,9 +897,11 @@ class LinProductSolver:
             self.dtype = self.ls.dtype
         else:
             self.sol0 = sol0
-            self.dtype = infer_dtype(list(self.data.values())
-                                     + list(self.sol0.values())
-                                     + list(self.wgts.values()))
+            self.dtype = infer_dtype(
+                list(self.data.values())
+                + list(self.sol0.values())
+                + list(self.wgts.values())
+            )
 
     def gen_taylors(self, keys=None):
         """Perform Taylor expansion, and map eq. keys to taylor expansion keys."""
