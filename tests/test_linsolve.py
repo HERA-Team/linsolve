@@ -490,7 +490,9 @@ class TestLinProductSolver:
             np.testing.assert_almost_equal(eval(k), 0.002)
         assert len(ls.ls.prms) == 3
 
-        ls = linsolve.LinProductSolver(d, sol0, w, sparse=self.sparse, build_solver=False)
+        ls = linsolve.LinProductSolver(
+            d, sol0, w, sparse=self.sparse, build_solver=False
+        )
         assert not hasattr(ls, "ls")
         assert ls.dtype == np.complex64
 

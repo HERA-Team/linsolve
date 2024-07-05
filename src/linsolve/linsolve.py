@@ -564,7 +564,7 @@ class LinearSolver:
         methods.
         """
         # As of numpy 1.8, solve works on stacks of matrices
-        # Change in numpy 2.0:            
+        # Change in numpy 2.0:
         # The b array is only treated as a shape (M,) column vector if it is
         # exactly 1-dimensional. In all other instances it is treated as a stack
         # of (M, K) matrices. Previously b would be treated as a stack of (M,)
@@ -696,7 +696,7 @@ class LinearSolver:
     def _chisq(self, sol, data, wgts, evaluator):
         """Internal adaptable chisq calculator."""
         if len(wgts) == 0:
-            sigma2 = {k: 1.0 for k in list(data.keys())}  # equal weights
+            sigma2 = dict.fromkeys(data.keys(), value=1.0)  # equal weights
         else:
             sigma2 = {k: wgts[k] ** -1 for k in list(wgts.keys())}
         evaluated = evaluator(sol, keys=data)
