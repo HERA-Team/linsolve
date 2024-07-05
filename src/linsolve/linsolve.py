@@ -45,7 +45,7 @@ def ast_getterms(n):
     if type(n) is ast.Name:
         return [[n.id]]
     elif type(n) is ast.Constant or type(n) is ast.Constant:
-        return [[n.n]]
+        return [[n.value]]
     elif type(n) is ast.Expression:
         return ast_getterms(n.body)
     elif type(n) is ast.UnaryOp:
@@ -564,14 +564,20 @@ class LinearSolver:
         methods.
         """
         # As of numpy 1.8, solve works on stacks of matrices
+        # Change in numpy 2.0:            
+        # The b array is only treated as a shape (M,) column vector if it is
+        # exactly 1-dimensional. In all other instances it is treated as a stack
+        # of (M, K) matrices. Previously b would be treated as a stack of (M,)
+        # vectors if b.ndim was equal to a.ndim - 1.
         At = A.transpose([2, 1, 0]).conj()
         AtA = [np.dot(At[k], A[..., k]) for k in range(y.shape[-1])]
-        Aty = [np.dot(At[k], y[..., k]) for k in range(y.shape[-1])]
+        Aty = [np.dot(At[k], y[..., k])[:, None] for k in range(y.shape[-1])]
 
         # This is slower by about 50%: scipy.linalg.solve(AtA, Aty, 'her')
 
         # But this sometimes errors if singular:
-        return np.linalg.solve(AtA, Aty).T
+        print(len(AtA), len(Aty), AtA[0].shape, Aty[0].shape)
+        return np.linalg.solve(AtA, Aty).T[0]
 
     def _invert_solve_sparse(self, xs_ys_vals, y, rcond):
         """Use linalg.solve to solve a fully constrained (non-degenerate) system of eqs.

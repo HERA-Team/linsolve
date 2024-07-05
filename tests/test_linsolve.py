@@ -141,7 +141,7 @@ class TestLinearEquation:
 
 
 class TestLinearSolver:
-    def setup(self):
+    def setup_class(self):
         self.sparse = False
         eqs = ["x+y", "x-y"]
         x, y = 1, 2
@@ -366,7 +366,7 @@ class TestLinearSolverSparse(TestLinearSolver):
 
 
 class TestLogProductSolver:
-    def setup(self):
+    def setup_class(self):
         self.sparse = False
 
     def test_init(self):
@@ -466,7 +466,7 @@ class TestLogProductSolverSparse(TestLogProductSolver):
 
 
 class TestLinProductSolver:
-    def setup(self):
+    def setup_class(self):
         self.sparse = False
 
     def test_init(self):
