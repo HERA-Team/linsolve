@@ -571,13 +571,12 @@ class LinearSolver:
         # vectors if b.ndim was equal to a.ndim - 1.
         At = A.transpose([2, 1, 0]).conj()
         AtA = [np.dot(At[k], A[..., k]) for k in range(y.shape[-1])]
-        Aty = [np.dot(At[k], y[..., k])[:, None] for k in range(y.shape[-1])]
+        Aty = [np.dot(At[k], y[..., k])[..., None] for k in range(y.shape[-1])]
 
         # This is slower by about 50%: scipy.linalg.solve(AtA, Aty, 'her')
 
         # But this sometimes errors if singular:
-        print(len(AtA), len(Aty), AtA[0].shape, Aty[0].shape)
-        return np.linalg.solve(AtA, Aty).T[0]
+        return np.linalg.solve(AtA, Aty)[..., 0].T
 
     def _invert_solve_sparse(self, xs_ys_vals, y, rcond):
         """Use linalg.solve to solve a fully constrained (non-degenerate) system of eqs.
@@ -588,7 +587,7 @@ class LinearSolver:
         AtA, Aty = self._get_AtA_Aty_sparse(xs_ys_vals, y)
         # AtA and Aty don't end up being that sparse, usually, so don't use this:
         # --> x = scipy.sparse.linalg.spsolve(AtA, Aty)
-        return np.linalg.solve(AtA, Aty).T
+        return np.linalg.solve(AtA, Aty[..., None])[..., 0].T
 
     def _invert_default(self, A, y, rcond):
         """The default inverter, currently 'pinv'."""
