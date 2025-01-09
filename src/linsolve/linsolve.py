@@ -568,7 +568,7 @@ class LinearSolver:
         """Use np.linalg.solve to solve a system of equations.
 
         Requires a fully constrained system of equations (i.e. doesn't deal with
-        singular matrices).  Can by ~1.5x faster that lstsq for this case. 'rcond'
+        singular matrices).  Can be ~1.5x faster than lstsq for this case. 'rcond'
         is unused, but passed as an argument to match the interface of other _invert
         methods.
         """
@@ -644,8 +644,8 @@ class LinearSolver:
             a dictionary of solutions with variables as keys
         """
         assert mode in ["default", "lsqr", "pinv", "solve"]
-        if rcond is None:
-            rcond = np.finfo(self.dtype).resolution
+        #if rcond is None:
+        #    rcond = np.finfo(self.dtype).resolution
         y = self.get_weighted_data()
         if self.sparse:
             xs, ys, vals = self.get_A_sparse()
