@@ -177,6 +177,7 @@ class LinearEquation:
         self.wgts = kwargs.pop("wgts", np.float32(1.0))
         self.has_conj = False
         constants = kwargs.pop("constants", kwargs)
+        self.additive_offset = np.float32(0.0)
         self.process_terms(val, constants)
 
     def process_terms(self, terms, constants):
@@ -211,11 +212,17 @@ class LinearEquation:
         for L in terms:
             L.sort(key=lambda x: get_name(x) in self.prms)
         # Validate that each term has exactly 1 unsolved parameter.
+        final_terms = []
         for t in terms:
-            assert get_name(t[-1]) in self.prms
+            # Check if this term has no free parameters (i.e. additive constant)
+            if get_name(t[-1]) not in self.prms:
+                self.additive_offset += self.eval_consts(t)
+                continue
+            # Make sure there is no more than 1 free parameter per term
             for ti in t[:-1]:
                 assert type(ti) is not str or get_name(ti) in self.consts
-        return terms
+            final_terms.append(t)
+        return final_terms
 
     def eval_consts(self, const_list, wgts=np.float32(1.0)):
         """Multiply out constants (and wgts) for placing in matrix."""
@@ -251,6 +258,8 @@ class LinearEquation:
             else:
                 total *= sol[name]
             rv += total
+        # add back in purely constant terms, which were filtered out of self.terms
+        rv += self.additive_offset
         return rv
 
 
@@ -430,7 +439,7 @@ class LinearSolver:
                 dtype = np.complex64
             else:
                 dtype = np.complex128
-        d = np.array([self.data[k] for k in self.keys], dtype=dtype)
+        d = np.array([self.data[k] - eq.additive_offset for k, eq in zip(self.keys, self.eqs)], dtype=dtype)
         if len(self.wgts) > 0:
             w = np.array([self.wgts[k] for k in self.keys])
             w.shape += (1,) * (d.ndim - w.ndim)
