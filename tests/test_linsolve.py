@@ -124,9 +124,10 @@ class TestLinearEquation:
         terms4 = [["c", "x", "a"], [1, "b", "y"]]
         with pytest.raises(AssertionError):
             le.order_terms(terms4)
-        terms5 = [[1, "a", "b"], [1, "b", "y"]]
-        with pytest.raises(AssertionError):
-            le.order_terms(terms5)
+        terms5 = [["a", "b"], [1, "b", "y"]]
+        terms = le.order_terms(terms5)
+        assert len(terms) == 1
+        assert le.additive_offset == 8
 
     def test_eval(self):
         le = linsolve.LinearEquation("a*x-b*y", a=2, b=4)
@@ -138,6 +139,9 @@ class TestLinearEquation:
         sol = {"x": 3 + 3j * np.ones(10), "y": 7 + 2j * np.ones(10)}
         ans = np.conj(sol["x"]) - sol["y"]
         np.testing.assert_equal(ans, le.eval(sol))
+        le = linsolve.LinearEquation("a*b+a*x-b*y", a=2, b=4)
+        sol = {'x': 3, 'y': 7}
+        assert 2 * 4 + 2 * 3 - 4 * 7 == le.eval(sol)
 
 
 class TestLinearSolver:
@@ -276,6 +280,23 @@ class TestLinearSolver:
         result = ls.eval(sol, "a*x+b*y")
         np.testing.assert_almost_equal(3 * 1 + 1 * 2, list(result.values())[0])
 
+    def test_eval_const_term(self):
+        x, y = 1.0, 2.0
+        a, b = 3.0 * np.ones(4), 1.0
+        eqs = ["a*b+a*x+y", "a+x+b*y"]
+        d, w = {}, {}
+        for eq in eqs:
+            d[eq], w[eq] = eval(eq) * np.ones(4), np.ones(4)
+        ls = linsolve.LinearSolver(d, w, a=a, b=b, sparse=self.sparse)
+        sol = ls.solve()
+        np.testing.assert_almost_equal(sol["x"], x * np.ones(4, dtype=np.float64))
+        np.testing.assert_almost_equal(sol["y"], y * np.ones(4, dtype=np.float64))
+        result = ls.eval(sol)
+        for eq in d:
+            np.testing.assert_almost_equal(d[eq], result[eq])
+        result = ls.eval(sol, "a*b+a*x+b*y")
+        np.testing.assert_almost_equal(3 * 1 + 3 * 1 + 1 * 2, list(result.values())[0])
+
     def test_chisq(self):
         x = 1.0
         d = {"x": 1, "a*x": 2}
@@ -292,6 +313,14 @@ class TestLinearSolver:
         x = 1.0
         d = {"1*x": 2.0, "x": 1.0}
         w = {"1*x": 1.0, "x": 0.5}
+        ls = linsolve.LinearSolver(d, wgts=w, sparse=self.sparse)
+        sol = ls.solve()
+        chisq = ls.chisq(sol)
+        np.testing.assert_almost_equal(sol["x"], 5.0 / 3.0, 6)
+        np.testing.assert_almost_equal(ls.chisq(sol), 1.0 / 3.0)
+        x = 1.0
+        d = {"1*x+1": 3.0, "x": 1.0}
+        w = {"1*x+1": 1.0, "x": 0.5}
         ls = linsolve.LinearSolver(d, wgts=w, sparse=self.sparse)
         sol = ls.solve()
         chisq = ls.chisq(sol)

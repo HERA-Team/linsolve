@@ -9,7 +9,7 @@
 # Overview
 
 The solvers in `linsolve` include `LinearSolver`, `LogProductSolver`, and `LinProductSolver`.
-`LinearSolver` solves linear equations of the form `'a*x + b*y + c*z'`.
+`LinearSolver` solves linear equations of the form `'a*x + b*y + c*z + d'`.
 `LogProductSolver` uses logrithms to linearize equations of the form `'x*y*z'`.
 `LinProductSolver` uses symbolic Taylor expansion to linearize equations of the
 form `'x*y + y*z'`.
