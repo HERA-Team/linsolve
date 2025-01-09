@@ -12,14 +12,14 @@ where equations are passed in as a dictionary where each key is a string
 describing the equation (which is parsed according to python syntax) and each
 value is the corresponding "measured" value of that equation.  Variable names
 in equations are checked against keyword arguments to the solver to determine
-if they are provided constants or parameters to be solved for.  Parameter anmes
+if they are provided constants or parameters to be solved for.  Parameter names
 and solutions are return are returned as key:value pairs in ls.solve().
 Parallel instances of equations can be evaluated by providing measured values
 as numpy arrays.  Constants can also be arrays that comply with standard numpy
 broadcasting rules.  Finally, weighting is implemented through an optional wgts
 dictionary that parallels the construction of data.
 
-LinearSolver solves linear equations of the form 'a*x + b*y + c*z'.
+LinearSolver solves linear equations of the form 'a*x + b*y + c*z + d'.
 LogProductSolver uses logrithms to linearize equations of the form 'x*y*z'.
 LinProductSolver uses symbolic Taylor expansion to linearize equations of the
 form 'x*y + y*z'.
@@ -308,7 +308,7 @@ def infer_dtype(values):
 
 class LinearSolver:
     def __init__(self, data, wgts={}, sparse=False, **kwargs):
-        """Set up a linear system of equations of the form 1*a + 2*b + 3*c = 4.
+        """Set up a linear system of equations of the form 1*a + 2*b + 3*c + 4 = 5.
 
         Parameters
         ----------
