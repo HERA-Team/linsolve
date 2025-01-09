@@ -297,6 +297,25 @@ class TestLinearSolver:
         result = ls.eval(sol, "a*b+a*x+b*y")
         np.testing.assert_almost_equal(3 * 1 + 3 * 1 + 1 * 2, list(result.values())[0])
 
+    def test_specific_system(self):
+        eqs = {
+            'Ii_R1 + Io_R1': 0.,
+            'Vi_R1 - Io_R1 * Z_R1 - Vo_R1': 0.,
+            'Ii_R2 + Io_R2': 0.,
+            'Vi_R2 - Io_R2 * Z_R2 - Vo_R2': 0.,
+            'I_s + Ii_R1': 0.,
+            'V_s - Vi_R1': 0.,
+            'Io_R1 + Ii_R2': 0.,
+            'Vo_R1 - Vi_R2': 0.,
+            'Io_R2 + I_GND': 0.,
+            'Vo_R2 - V_GND': 0.,
+        }
+        consts = {'Z_R1': 50., 'Z_R2': 50., 'V_GND': 0., 'V_s': 1.}
+        ls = linsolve.LinearSolver(eqs, **consts)
+        for mode in ('solve', 'lsqr', 'pinv', 'default'):
+            sol = ls.solve(mode=mode)
+            np.testing.assert_almost_equal(sol['Vo_R1'], 0.5, 4)
+
     def test_chisq(self):
         x = 1.0
         d = {"x": 1, "a*x": 2}
